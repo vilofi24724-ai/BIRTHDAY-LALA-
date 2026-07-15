@@ -12,6 +12,9 @@ document.getElementById("galleryImage");
 const caption =
 document.getElementById("caption");
 
+const progress =
+document.getElementById("progress");
+
 const typingLetter =
 document.getElementById("typingLetter");
 
@@ -50,6 +53,21 @@ const photos = [
 "foto29.jpeg",
 "foto30.jpeg"
 ];
+
+function preloadImages(){
+
+photos.forEach(photo=>{
+
+const img=new Image();
+
+img.src=photo;
+
+});
+
+}
+
+preloadImages();
+
 
 const captions = [
 
@@ -118,47 +136,74 @@ let current = 0;
 
 startBtn.addEventListener("click", () => {
 
-music.play();
+    startBtn.disabled = true;
 
-gallerySection.classList.remove("hidden");
+    music.play().catch(()=>{});
 
-gallerySection.scrollIntoView({
-behavior:"smooth"
-});
+    gallerySection.classList.remove("hidden");
 
-launchConfetti();
+    gallerySection.scrollIntoView({
+        behavior:"smooth"
+    });
 
-showPhotos();
+    launchConfetti();
+
+    showPhotos();
 
 });
 
 function showPhotos(){
 
-galleryImage.src = photos[current];
+    if(current >= photos.length){
 
-caption.innerText = captions[current];
+        setTimeout(showLetter,1000);
 
-galleryImage.style.animation = "none";
+        return;
 
-setTimeout(()=>{
-galleryImage.style.animation="pop .8s";
-},50);
+    }
 
-current++;
+    galleryImage.classList.add("fade-out");
 
-if(current < photos.length){
+    setTimeout(()=>{
 
-setTimeout(showPhotos,3000);
+        const img = new Image();
 
-}else{
+img.onload = afterLoaded;
 
-setTimeout(()=>{
-showLetter();
-},4000);
+img.src = photos[current];
+
+function afterLoaded(){
+
+    galleryImage.src = img.src;
+galleryImage.decoding = "async";
+
+    caption.innerText = captions[current];
+
+    progress.innerText =
+    `📷 Foto ${current+1} / ${photos.length}`;
+
+    galleryImage.classList.remove("fade-out");
+
+// Reset animasi
+galleryImage.classList.remove("fade-in");
+void galleryImage.offsetWidth;
+
+galleryImage.classList.add("fade-in");
+
+setTimeout(() => {
+    galleryImage.classList.remove("fade-in");
+}, 600);
+
+    current++;
+
+    setTimeout(showPhotos,3000);
 
 }
 
+},300);
+
 }
+
 
 function showLetter(){
 
@@ -211,6 +256,7 @@ Terima kasih untuk semuanya.
 💖 w love fika 💖
 `;
 
+
 typeWriter(text);
 
 launchConfetti();
@@ -219,23 +265,25 @@ launchConfetti();
 
 function typeWriter(text){
 
-let i = 0;
+    typingLetter.innerHTML = "";
 
-function typing(){
+    let i = 0;
 
-if(i < text.length){
+    function typing(){
 
-typingLetter.innerHTML += text.charAt(i);
+        if(i < text.length){
 
-i++;
+            typingLetter.innerHTML += text.charAt(i);
 
-setTimeout(typing,40);
+            i++;
 
-}
+            setTimeout(typing,40);
 
-}
+        }
 
-typing();
+    }
+
+    typing();
 
 }
 
@@ -273,4 +321,4 @@ heart.remove();
 
 }
 
-setInterval(createHeart,500);
+setInterval(createHeart,1200);
